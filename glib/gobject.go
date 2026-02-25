@@ -12,6 +12,8 @@ import (
 	"math"
 	"runtime"
 	"unsafe"
+
+	gopointer "github.com/go-gst/go-pointer"
 )
 
 // Object is a representation of GLib's GObject.
@@ -446,6 +448,36 @@ func (v *Object) GetPrivate() unsafe.Pointer {
 		return nil
 	}
 	return unsafe.Pointer(private)
+}
+
+func (v *Object) SetQData(key string, data interface{}) {
+	cKey := C.CString(key)
+	defer C.free(unsafe.Pointer(cKey))
+	q := C.g_quark_from_string(cKey)
+
+	ptr := gopointer.Save(data)
+
+	C.g_object_set_qdata_full(
+		v.native(),
+		q,
+		C.gpointer(ptr),
+		C.GDestroyNotify(C._qdata_destroy),
+	)
+}
+
+func (v *Object) GetQData(key string) interface{} {
+	cKey := C.CString(key)
+	defer C.free(unsafe.Pointer(cKey))
+	q := C.g_quark_from_string(cKey)
+	if q == 0 {
+		return nil
+	}
+
+	rawPtr := C.g_object_get_qdata(v.native(), q)
+	if rawPtr == nil {
+		return nil
+	}
+	return gopointer.Restore(unsafe.Pointer(rawPtr))
 }
 
 // Deprecated: this is not thread safe against C threads

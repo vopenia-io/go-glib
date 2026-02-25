@@ -112,3 +112,8 @@ func goInstanceInit(obj *C.GTypeInstance, klass C.gpointer) {
 		initter.InstanceInit(newObject(ToGObject(unsafe.Pointer(obj))))
 	}
 }
+
+//export goUnrefGopointer
+func goUnrefGopointer(ptr C.gpointer) {
+    gopointer.Unref(unsafe.Pointer(ptr))
+}

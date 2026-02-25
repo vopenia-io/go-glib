@@ -211,4 +211,10 @@ static void glib_go_arbitrary_data_free (GlibGoArbitraryData * orig);
  * end custom glib type for arbitrary go data
  */
 
+extern void goUnrefGopointer(gpointer data);
+
+static inline void _qdata_destroy(gpointer data) {
+    goUnrefGopointer(data);
+}
+
 #endif
