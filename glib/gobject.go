@@ -461,7 +461,7 @@ func (v *Object) SetQData(key string, data interface{}) {
 		v.native(),
 		q,
 		C.gpointer(ptr),
-		C.GDestroyNotify(C._qdata_destroy),
+		C.GDestroyNotify(C.goUnrefGopointer),
 	)
 }
 

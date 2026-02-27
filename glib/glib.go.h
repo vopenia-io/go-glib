@@ -213,8 +213,4 @@ static void glib_go_arbitrary_data_free (GlibGoArbitraryData * orig);
 
 extern void goUnrefGopointer(gpointer data);
 
-static inline void _qdata_destroy(gpointer data) {
-    goUnrefGopointer(data);
-}
-
 #endif
