@@ -424,6 +424,31 @@ func GetUserSpecialDir(directory UserDirectory) (string, error) {
 	return C.GoString((*C.char)(c)), nil
 }
 
+// SetEnv is a wrapper around g_setenv().  The overwrite parameter determines
+// whether the environment variable will be overwritten if it already exists.
+func SetEnv(key, value string, overwrite bool) {
+	cKey := C.CString(key)
+	defer C.free(unsafe.Pointer(cKey))
+
+	cValue := C.CString(value)
+	defer C.free(unsafe.Pointer(cValue))
+
+	C.g_setenv(cKey, cValue, gbool(overwrite))
+}
+
+// GetEnv is a wrapper around g_getenv().
+// An empty string is returned if the environment variable is not set to differentiate between NULL and an empty string.
+func GetEnv(key string) string {
+	cKey := C.CString(key)
+	defer C.free(unsafe.Pointer(cKey))
+
+	cValue := C.g_getenv(cKey)
+	if cValue == nil {
+		return ""
+	}
+	return C.GoString((*C.char)(cValue))
+}
+
 /*
  * GObject
  */
