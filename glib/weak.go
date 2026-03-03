@@ -23,9 +23,6 @@ func WeakRefInit(object any) *WeakRef {
 	}
 
 	obj := o.native()
-	if obj == nil {
-		return nil
-	}
 	var weakRef *C.GWeakRef
 	weakRef = (*C.GWeakRef)(C.malloc(C.sizeof_GWeakRef))
 	C.g_weak_ref_init(weakRef, ((C.gpointer)(obj)))
@@ -42,16 +39,12 @@ func (weakRef *WeakRef) Get() *Object {
 	if obj == nil {
 		return nil
 	}
-	o := wrapObject(unsafe.Pointer(obj))
-	o.Unref() // g_weak_ref_get() also add a ref count
+	o := wrapObjectClean(unsafe.Pointer(obj))
+	runtime.SetFinalizer(o, (*Object).Unref)
 	return o
 }
 
 func (weakRef *WeakRef) Set(object *Object) {
 	obj := object.native()
-	if obj == nil {
-		C.g_weak_ref_set(weakRef.GWeakRef, nil)
-		return
-	}
 	C.g_weak_ref_set(weakRef.GWeakRef, ((C.gpointer)(obj)))
 }
