@@ -192,3 +192,21 @@ func NewBoxedParam(name, nick, blurb string, boxedType Type, flags ParameterFlag
 	)
 	return &ParamSpec{paramSpec: paramSpec}
 }
+
+func NewObjectParam(name, nick, blurb string, objectType Type, flags ParameterFlags) *ParamSpec {
+	cname := (*C.gchar)(C.CString(name))
+	defer C.free(unsafe.Pointer(cname))
+	cnick := (*C.gchar)(C.CString(nick))
+	defer C.free(unsafe.Pointer(cnick))
+	cblurb := (*C.gchar)(C.CString(blurb))
+	defer C.free(unsafe.Pointer(cblurb))
+
+	paramSpec := C.g_param_spec_object(
+		cname,
+		cnick,
+		cblurb,
+		C.GType(objectType),
+		C.GParamFlags(flags),
+	)
+	return &ParamSpec{paramSpec: paramSpec}
+}

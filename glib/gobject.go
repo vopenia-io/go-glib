@@ -289,7 +289,12 @@ func (v *Object) SetPropertyValue(name string, value *Value) error {
 		return err
 	}
 	if valType != propType {
-		return fmt.Errorf("invalid type %s for property %s", value.TypeName(), name)
+		// Allow int values for enum/flags properties
+		propFundamental := Type(C.g_type_fundamental(C.GType(propType)))
+		if !((propFundamental == TYPE_ENUM || propFundamental == TYPE_FLAGS) &&
+			(valType == TYPE_INT || valType == TYPE_UINT)) {
+			return fmt.Errorf("invalid type %s for property %s, want %s", value.TypeName(), name, propType.Name())
+		}
 	}
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
