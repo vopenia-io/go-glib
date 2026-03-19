@@ -58,6 +58,14 @@ func NewObjectWithProperties(_type Type, properties map[string]interface{}) (*Ob
 	return TransferFull(unsafe.Pointer(obj)), nil
 }
 
+func IsGObject(obj any) bool {
+	if obj == nil {
+		return false
+	}
+	_, ok := obj.(interface{ native() *C.GObject })
+	return ok
+}
+
 func (v *Object) toGObject() *C.GObject {
 	if v == nil {
 		return nil
