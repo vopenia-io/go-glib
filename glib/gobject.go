@@ -79,6 +79,9 @@ func (v *Object) toObject() *Object {
 
 // newObject creates a new Object from a GObject pointer.
 func newObject(p *C.GObject) *Object {
+	if p == nil {
+		return nil
+	}
 	return &Object{GObject: p}
 }
 
@@ -116,6 +119,9 @@ func (v *Object) goValue() (interface{}, error) {
 // Ref. A runtime finalizer is placed on the object to clear the ref
 // when the object leaves scope.
 func Take(ptr unsafe.Pointer) *Object {
+	if ptr == nil {
+		return nil
+	}
 	obj := newObject(ToGObject(ptr))
 
 	if obj.IsFloating() {
@@ -135,6 +141,9 @@ func TransferNone(ptr unsafe.Pointer) *Object { return Take(ptr) }
 // it does not increase the ref count on the object. A finalizer is placed on the object
 // to clear the transferred ref.
 func TransferFull(ptr unsafe.Pointer) *Object {
+	if ptr == nil {
+		return nil
+	}
 	obj := newObject(ToGObject(ptr))
 	runtime.SetFinalizer(obj, (*Object).Unref)
 	return obj
