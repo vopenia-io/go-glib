@@ -2,6 +2,7 @@ package glib
 
 // #include <glib.h>
 // #include <glib-object.h>
+// #include <gobject/gsignal.h>
 // #include "glib.go.h"
 import "C"
 import (
@@ -74,6 +75,10 @@ func (v *Object) Connect(detailedSignal string, f interface{}, userData ...inter
 // will be invoked after the default handler, not before.
 func (v *Object) ConnectAfter(detailedSignal string, f interface{}, userData ...interface{}) (SignalHandle, error) {
 	return v.connectClosure(true, detailedSignal, f, userData...)
+}
+
+func (v *Object) SignalHasHandlerPending(signalID uint, detail Quark, mayBeBlocked bool) bool {
+	return C.g_signal_has_handler_pending(C.gpointer(v.native()), C.guint(signalID), C.GQuark(detail), gbool(mayBeBlocked)) != 0
 }
 
 // ClosureNew creates a new GClosure with the given function f. The returned closure is floating. This
