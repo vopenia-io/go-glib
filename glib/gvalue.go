@@ -167,6 +167,8 @@ func gValue(v interface{}) (gvalue *Value, err error) {
 	}
 
 	switch e := v.(type) {
+	case *Value:
+		return e.Copy()
 	case bool:
 		val, err := ValueInit(TYPE_BOOLEAN)
 		if err != nil {
