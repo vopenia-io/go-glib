@@ -510,6 +510,16 @@ func (s *Signal) String() string {
 
 type Quark uint32
 
+func QuarkFromString(s string) Quark {
+	cstr := C.CString(s)
+	defer C.free(unsafe.Pointer(cstr))
+	return Quark(C.g_quark_from_string(cstr))
+}
+
+func (q Quark) native() C.GQuark {
+	return C.GQuark(q)
+}
+
 // GetApplicationName is a wrapper around g_get_application_name().
 func GetApplicationName() string {
 	c := C.g_get_application_name()

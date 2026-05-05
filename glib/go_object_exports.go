@@ -109,11 +109,11 @@ func goInstanceInit(obj *C.GTypeInstance, klass C.gpointer) {
 
 	// If the go type implements an Initter call it.
 	if initter, ok := goelem.(Initter); ok {
-		initter.InstanceInit(newObject(ToGObject(unsafe.Pointer(obj))))
+		initter.InstanceInit(NewObject(ToGObject(unsafe.Pointer(obj))))
 	}
 }
 
 //export goUnrefGopointer
 func goUnrefGopointer(ptr C.gpointer) {
-    gopointer.Unref(unsafe.Pointer(ptr))
+	gopointer.Unref(unsafe.Pointer(ptr))
 }

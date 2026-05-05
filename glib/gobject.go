@@ -4,6 +4,7 @@ package glib
 #include "glib.go.h"
 
 GObjectClass *  getGObjectClass (void * p)  { return (G_OBJECT_GET_CLASS(p)); }
+bool g_is_object (void * p) { return G_IS_OBJECT(p); }
 */
 import "C"
 import (
@@ -66,6 +67,10 @@ func IsGObject(obj any) bool {
 	return ok
 }
 
+func GIsObject(obj unsafe.Pointer) bool {
+	return obj != nil && bool(C.g_is_object(obj))
+}
+
 func (v *Object) toGObject() *C.GObject {
 	if v == nil {
 		return nil
@@ -77,8 +82,8 @@ func (v *Object) toObject() *Object {
 	return v
 }
 
-// newObject creates a new Object from a GObject pointer.
-func newObject(p *C.GObject) *Object {
+// NewObject creates a new Object from a GObject pointer.
+func NewObject(p *C.GObject) *Object {
 	if p == nil {
 		return nil
 	}
@@ -122,7 +127,7 @@ func Take(ptr unsafe.Pointer) *Object {
 	if ptr == nil {
 		return nil
 	}
-	obj := newObject(ToGObject(ptr))
+	obj := NewObject(ToGObject(ptr))
 
 	if obj.IsFloating() {
 		obj.RefSink()
@@ -144,7 +149,7 @@ func TransferFull(ptr unsafe.Pointer) *Object {
 	if ptr == nil {
 		return nil
 	}
-	obj := newObject(ToGObject(ptr))
+	obj := NewObject(ToGObject(ptr))
 	runtime.SetFinalizer(obj, (*Object).Unref)
 	return obj
 }
@@ -473,29 +478,48 @@ func (v *Object) GetPrivate() unsafe.Pointer {
 }
 
 func (v *Object) SetQData(key string, data interface{}) {
-	cKey := C.CString(key)
-	defer C.free(unsafe.Pointer(cKey))
-	q := C.g_quark_from_string(cKey)
+	q := QuarkFromString(key)
 
 	ptr := gopointer.Save(data)
 
 	C.g_object_set_qdata_full(
 		v.native(),
-		q,
+		q.native(),
+		C.gpointer(ptr),
+		C.GDestroyNotify(C.goUnrefGopointer),
+	)
+}
+
+func (v *Object) SetQDataQuark(key Quark, data interface{}) {
+	ptr := gopointer.Save(data)
+
+	C.g_object_set_qdata_full(
+		v.native(),
+		key.native(),
 		C.gpointer(ptr),
 		C.GDestroyNotify(C.goUnrefGopointer),
 	)
 }
 
 func (v *Object) GetQData(key string) interface{} {
-	cKey := C.CString(key)
-	defer C.free(unsafe.Pointer(cKey))
-	q := C.g_quark_from_string(cKey)
+	q := QuarkFromString(key)
 	if q == 0 {
 		return nil
 	}
 
-	rawPtr := C.g_object_get_qdata(v.native(), q)
+	rawPtr := C.g_object_get_qdata(v.native(), q.native())
+	if rawPtr == nil {
+		return nil
+	}
+	return gopointer.Restore(unsafe.Pointer(rawPtr))
+}
+
+func (v *Object) GetQDataQuark(key Quark) interface{} {
+	if key == 0 {
+		return nil
+	}
+
+	rawPtr := C.g_object_get_qdata(v.native(), key.native())
 	if rawPtr == nil {
 		return nil
 	}
