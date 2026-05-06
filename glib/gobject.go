@@ -2,6 +2,7 @@ package glib
 
 /*
 #include "glib.go.h"
+#include <stdlib.h>
 
 GObjectClass *  getGObjectClass (void * p)  { return (G_OBJECT_GET_CLASS(p)); }
 bool g_is_object (void * p) { return G_IS_OBJECT(p); }
