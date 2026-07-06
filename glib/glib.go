@@ -30,6 +30,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"runtime/debug"
 	"unsafe"
 
 	gopointer "github.com/go-gst/go-pointer"
@@ -191,6 +192,13 @@ func goMarshal(
 	invocationHint C.gpointer,
 	marshalData C.gpointer,
 ) {
+	// Recover panics from the signal callback dispatched below.
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintf(os.Stderr, "recovered panic in signal callback: %v\n%s\n", r, debug.Stack())
+		}
+	}()
+
 	// Get the context associated with this callback closure.
 	cc := gopointer.Restore(unsafe.Pointer(marshalData)).(*closureContext)
 
